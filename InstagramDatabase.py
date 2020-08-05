@@ -1,120 +1,7 @@
 import psycopg2
 
-
-class Database:
-    def get_db(self):
-        try:
-            connection = psycopg2.connect(dbname="d1un08c4ikop2s",
-                                          user="zbvsjseotlonov",
-                                          password="92a9bc55b03b692658e5776cbce5cc8769e72d90a9806bbe824f2cec215f42ce",
-                                          host="ec2-54-217-213-79.eu-west-1.compute.amazonaws.com",
-                                          port="5432")
-
-            cursor = connection.cursor()
-            # Print PostgreSQL Connection properties
-            print(connection.get_dsn_parameters(), "\n")
-
-            # Print PostgreSQL version
-            cursor.execute("SELECT version();")
-            record = cursor.fetchone()
-            print("You are connected to - ", record, "\n")
-
-        except (Exception, psycopg2.Error) as error:
-            print("Error while connecting to PostgreSQL", error)
-        finally:
-            # closing database connection.
-            if (connection):
-                cursor.close()
-                connection.close()
-                print("PostgreSQL connection is closed")
-
+class InstagramDatabase(object):
     # create tables
-    def create_table_user(self):
-        try:
-            connection = psycopg2.connect(dbname="d1un08c4ikop2s",
-                                          user="zbvsjseotlonov",
-                                          password="92a9bc55b03b692658e5776cbce5cc8769e72d90a9806bbe824f2cec215f42ce",
-                                          host="ec2-54-217-213-79.eu-west-1.compute.amazonaws.com",
-                                          port="5432")
-
-            cursor = connection.cursor()
-
-            create_table_query = '''CREATE TABLE table_user
-                  (ID SERIAL PRIMARY KEY     NOT NULL,
-                  user_id    TEXT    NOT NULL,
-                  vk           TEXT    NOT NULL,
-                  ok           TEXT    NOT NULL,
-                  instagram         TEXT    NOT NULL); '''
-
-            cursor.execute(create_table_query)
-            connection.commit()
-            print("Table created successfully in PostgreSQL ")
-
-        except (Exception, psycopg2.DatabaseError) as error:
-            print("Error while creating PostgreSQL table", error)
-        finally:
-            # closing database connection.
-            if (connection):
-                cursor.close()
-                connection.close()
-                print("PostgreSQL connection is closed")
-
-    def create_table_vk(self):
-        try:
-            connection = psycopg2.connect(dbname="d1un08c4ikop2s",
-                                          user="zbvsjseotlonov",
-                                          password="92a9bc55b03b692658e5776cbce5cc8769e72d90a9806bbe824f2cec215f42ce",
-                                          host="ec2-54-217-213-79.eu-west-1.compute.amazonaws.com",
-                                          port="5432")
-
-            cursor = connection.cursor()
-            # TODO: Изменить айди на юзер айди
-            create_table_query = '''CREATE TABLE vk_tables
-                  (ID SERIAL PRIMARY KEY     NOT NULL,
-                  us_id    TEXT    NOT NULL,
-                  vk_id    TEXT    NOT NULL,
-                  table_name           TEXT    NOT NULL); '''
-
-            cursor.execute(create_table_query)
-            connection.commit()
-            print("Table created successfully in PostgreSQL ")
-
-        except (Exception, psycopg2.DatabaseError) as error:
-            print("Error while creating PostgreSQL table", error)
-        finally:
-            # closing database connection.
-            if (connection):
-                cursor.close()
-                connection.close()
-                print("PostgreSQL connection is closed")
-
-    def create_table_ok(self):
-        try:
-            connection = psycopg2.connect(dbname="d1un08c4ikop2s",
-                                          user="zbvsjseotlonov",
-                                          password="92a9bc55b03b692658e5776cbce5cc8769e72d90a9806bbe824f2cec215f42ce",
-                                          host="ec2-54-217-213-79.eu-west-1.compute.amazonaws.com",
-                                          port="5432")
-
-            cursor = connection.cursor()
-
-            create_table_query = '''CREATE TABLE ok_tables
-                  (ID SERIAL PRIMARY KEY     NOT NULL,
-                  ok_id    TEXT    NOT NULL,
-                  table_name           TEXT    NOT NULL); '''
-
-            cursor.execute(create_table_query)
-            connection.commit()
-            print("Table created successfully in PostgreSQL ")
-
-        except (Exception, psycopg2.DatabaseError) as error:
-            print("Error while creating PostgreSQL table", error)
-        finally:
-            # closing database connection.
-            if (connection):
-                cursor.close()
-                connection.close()
-                print("PostgreSQL connection is closed")
 
     def create_table_inst(self):
         try:
@@ -125,9 +12,8 @@ class Database:
                                           port="5432")
 
             cursor = connection.cursor()
-
             create_table_query = '''CREATE TABLE inst_tables
-                  (ID SERIAL PRIMARY KEY     NOT NULL,
+                  (us_id REAL PRIMARY KEY     NOT NULL,
                   inst_id    TEXT    NOT NULL,
                   table_name           TEXT    NOT NULL); '''
 
@@ -144,10 +30,8 @@ class Database:
                 connection.close()
                 print("PostgreSQL connection is closed")
 
-
-
-    #methods to add vk friends of user by link
-    def add_user_to_vk_db(self, us_id, vk_us_id):
+    # methods to add inst friends of user by link
+    def add_user_to_inst_db(self, us_id, inst_us_id):
         name = None
         is_contains = None
         try:
@@ -157,21 +41,18 @@ class Database:
                                           host="ec2-54-217-213-79.eu-west-1.compute.amazonaws.com",
                                           port="5432")
             cursor = connection.cursor()
-            #             check if vk_tables contains us_id sql-запрос
-            #             then update-запрос
-            #             else:
 
-            name = '{}_{}_{}'.format('vk', us_id, vk_us_id)
+            name = '{}_{}_{}'.format('inst', us_id, inst_us_id)
 
-            if (self.check_id_vk_tables(us_id, vk_us_id) == 0):
-                postgres_insert_query = """ INSERT INTO vk_tables (us_id, vk_id, table_name) VALUES (%s, %s, %s)"""
+            if (self.check_id_inst_tables(us_id, inst_us_id) == 0):
+                postgres_insert_query = """ INSERT INTO inst_tables (us_id, inst_id, table_name) VALUES (%s, %s, %s)"""
 
-                record_to_insert = (us_id, vk_us_id, name)
+                record_to_insert = (us_id, inst_us_id, name)
                 cursor.execute(postgres_insert_query, record_to_insert)
 
                 connection.commit()
                 count = cursor.rowcount
-                print(count, "Record inserted successfully into vk_tables table")
+                print(count, "Record inserted successfully into inst_tables table")
                 is_contains = False
             else:
                 is_contains = True
@@ -180,7 +61,7 @@ class Database:
         except (Exception, psycopg2.Error) as error:
             if (connection):
                 is_contains = True
-                print("Failed to insert record into vk_tables table", error)
+                print("Failed to insert record into inst_tables table", error)
 
         finally:
             # closing database connection.
@@ -191,7 +72,7 @@ class Database:
             return name, is_contains
 
     #
-    def create_table_friends_vk(self, name):
+    def create_table_friends_inst(self, name):
         try:
             connection = psycopg2.connect(dbname="d1un08c4ikop2s",
                                           user="zbvsjseotlonov",
@@ -220,7 +101,7 @@ class Database:
             print("PostgreSQL connection is closed")
 
     #
-    def check_id_vk_tables(self, user_id, vk_id):
+    def check_id_inst_tables(self, user_id, inst_id):
         count = 0
         try:
             connection = psycopg2.connect(dbname="d1un08c4ikop2s",
@@ -230,7 +111,8 @@ class Database:
                                           port="5432")
             cursor = connection.cursor()
 
-            postgres_insert_query = """SELECT vk_id FROM vk_tables WHERE vk_id = '{}' and us_id = '{}'""".format(vk_id, user_id)
+            postgres_insert_query = """SELECT inst_id FROM inst_tables WHERE inst_id = '{}' and us_id = '{}'""".format(
+                inst_id, user_id)
 
             cursor.execute(postgres_insert_query)
 
@@ -240,7 +122,7 @@ class Database:
 
         except (Exception, psycopg2.Error) as error:
             if (connection):
-                print("Failed command into vk_tables table", error)
+                print("Failed command into inst_tables table", error)
 
         finally:
             # closing database connection.
@@ -251,14 +133,14 @@ class Database:
             return count
 
     #
-    def add_vk_user_to_db(self, us_id, vk_us_id, friends):
-        name, is_contains = self.add_user_to_vk_db(us_id, vk_us_id)
+    def add_inst_user_to_db(self, us_id, inst_us_id, friends):
+        name, is_contains = self.add_user_to_inst_db(us_id, inst_us_id)
         if (is_contains == False):
-            self.create_table_friends_vk(name)
-        self.add_friends_table_vk(name, friends, is_contains)
+            self.create_table_friends_inst(name)
+        self.add_friends_table_inst(name, friends, is_contains)
 
     #
-    def add_friends_table_vk(self, name, friends, is_contains):
+    def add_friends_table_inst(self, name, friends, is_contains):
         try:
             connection = psycopg2.connect(dbname="d1un08c4ikop2s",
                                           user="zbvsjseotlonov",
@@ -303,10 +185,7 @@ class Database:
                 connection.close()
             print("PostgreSQL connection is closed")
 
-
-
-
-    # methods to get list of friends vk on website
+    # methods to get list of friends inst on website
     def get_friends_us_id_by_table_name(self, name):
         try:
             connection = psycopg2.connect(dbname="d1un08c4ikop2s",
@@ -317,14 +196,13 @@ class Database:
 
             cursor = connection.cursor()
 
-            postgres_insert_query = """SELECT us_id FROM vk_tables JOIN {} ON vk_tables.vk_id = {}.friend_id""".format(name, name)
+            postgres_insert_query = """SELECT us_id FROM inst_tables JOIN {} ON inst_tables.inst_id = {}.friend_id""".format(
+                name, name)
 
             cursor.execute(postgres_insert_query)
             connection.commit()
 
-            #         colnames = [desc[0] for desc in cursor.description]
             records = cursor.fetchall()
-            #         print(records)
             print("Successfully in PostgreSQL ")
 
             pr_fr_l = []
@@ -354,13 +232,15 @@ class Database:
 
             cursor = connection.cursor()
 
-            postgres_insert_query = """SELECT table_name FROM vk_tables WHERE vk_tables.us_id = '{}'""".format(us_id)
+            postgres_insert_query = """SELECT table_name FROM inst_tables WHERE inst_tables.us_id = '{}'""".format(
+                us_id)
 
             cursor.execute(postgres_insert_query)
             connection.commit()
 
-            #         colnames = [desc[0] for desc in cursor.description]
             records = cursor.fetchall()
+
+
             #         print(records)
             print("{} Successfully in PostgreSQL ".format(postgres_insert_query))
 
@@ -374,6 +254,8 @@ class Database:
                 cursor.close()
                 connection.close()
                 print("PostgreSQL connection is closed")
+                if (len(records) == 0):
+                    return None
                 return records[0][0]
 
     def create_table_confidance_on_site(self, us_id):
@@ -385,8 +267,6 @@ class Database:
                                           host="ec2-54-217-213-79.eu-west-1.compute.amazonaws.com",
                                           port="5432")
             cursor = connection.cursor()
-
-
 
             create_table_query = '''CREATE TABLE {}
                   (FRIEND_ID SERIAL PRIMARY KEY     NOT NULL,
@@ -418,7 +298,8 @@ class Database:
                                           port="5432")
             cursor = connection.cursor()
 
-            postgres_insert_query = """SELECT FRIEND_ID FROM friends_on_site_{} WHERE FRIEND_ID = {}""".format(us_id, fr_id)
+            postgres_insert_query = """SELECT FRIEND_ID FROM friends_on_site_{} WHERE FRIEND_ID = {}""".format(
+                us_id, fr_id)
 
             cursor.execute(postgres_insert_query)
 
@@ -442,7 +323,7 @@ class Database:
         proposed_friends_list = []
         for friend in friends_ids:
             is_contains = False
-            while(is_contains == False):
+            while (is_contains == False):
                 count, is_contains = self.check_user_in_confidence_list(us_id, friend)
                 if (is_contains == False):
                     self.create_table_confidance_on_site(us_id)
@@ -460,7 +341,7 @@ class Database:
         return push_list, us_id
 
     def get_view_proposed_fr_list(self, friend_list):
-    #     method for web programmer. This method get list of friends id, which need to show
+        #     method for web programmer. This method get list of friends id, which need to show
         return 0
 
     def update_mark_score_for_friend(self, us_id, friend_id, score):
@@ -473,7 +354,8 @@ class Database:
                                           port="5432")
             cursor = connection.cursor()
 
-            postgres_insert_query = """ UPDATE friends_on_site_{} SET confidance = {} WHERE friend_id = {}""".format(us_id, score, friend_id)
+            postgres_insert_query = """ UPDATE friends_on_site_{} SET confidance = {} WHERE friend_id = {}""".format(
+                us_id, score, friend_id)
 
             cursor.execute(postgres_insert_query)
 
@@ -504,7 +386,8 @@ class Database:
 
             cursor = connection.cursor()
 
-            postgres_insert_query = """ INSERT INTO friends_on_site_{} (friend_id, confidance) VALUES ({}, {})""".format(us_id, friend_id, score)
+            postgres_insert_query = """ INSERT INTO friends_on_site_{} (friend_id, confidance) VALUES ({}, {})""".format(
+                us_id, friend_id, score)
 
             cursor.execute(postgres_insert_query)
             connection.commit()
